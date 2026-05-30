@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夢想存摺 V7</title>
+    <title>夢想存摺 V7.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
@@ -148,22 +148,32 @@
     </div>
 
     <script>
-        // 核心資料結構修正
         let currentMonthKey = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
 
+        // 【超級考古修復機制】自動向過去所有版本撈取舊資料
+        let backupData = JSON.parse(localStorage.getItem('habitProDataV6')) || 
+                         JSON.parse(localStorage.getItem('habitProDataV5')) || 
+                         JSON.parse(localStorage.getItem('habitProDataV4')) || 
+                         JSON.parse(localStorage.getItem('habitProDataDataV3')) || // 防呆防錯字
+                         { totalBank: 0, todayPoints: 0, themeColor: '#4f46e5', history: [], rewards: [] };
+
         let data = JSON.parse(localStorage.getItem('habitProDataV7')) || {
-            totalBank: 0,
-            todayPoints: 0,
-            themeColor: '#4f46e5',
+            totalBank: backupData.totalBank, // 完美承接過去的星星總數
+            todayPoints: backupData.todayPoints,
+            themeColor: backupData.themeColor,
             habits: [],
-            rewards: [],
-            history: [],
+            rewards: backupData.rewards || [], // 🌟 把之前兌換過、新增過的商品原封不動抓回來！
+            history: backupData.history || [], // 歷史紀錄也抓回來
             currentMonth: currentMonthKey,
             funBudgetUsed: 0,
             saveBudgetUsed: 0
         };
 
-        // 檢查並跨月重置預算
+        // 確保抓過來的舊商品都有預算分類（預設通通先歸類在 fun 娛樂，免得壞掉）
+        data.rewards.forEach(r => {
+            if (!r.category) r.category = 'fun';
+        });
+
         if (data.currentMonth !== currentMonthKey) {
             data.currentMonth = currentMonthKey;
             data.funBudgetUsed = 0;
@@ -210,7 +220,6 @@
             document.getElementById('todayPoints').innerText = `+${data.todayPoints}`;
             document.getElementById('budgetMonthLabel').innerText = data.currentMonth;
 
-            // 預算邏輯計算 (1點 = 1元)
             const funLeft = Math.max(0, 4000 - data.funBudgetUsed);
             const saveLeft = Math.max(0, 5663 - data.saveBudgetUsed);
             
@@ -220,7 +229,6 @@
             document.getElementById('saveBudgetText').innerText = `$${saveLeft.toLocaleString()} / $5,663`;
             document.getElementById('saveBudgetBar').style.width = `${(saveLeft / 5663) * 100}%`;
 
-            // 習慣渲染
             const hList = document.getElementById('habitList');
             hList.innerHTML = data.habits.map((h, i) => `
                 <div class="flex items-center space-x-2">
@@ -231,7 +239,6 @@
                 </div>
             `).join('');
 
-            // 商店與兌換渲染 (加入預算類別標籤)
             const rList = document.getElementById('rewardList');
             rList.innerHTML = data.rewards.map((r, i) => {
                 const percent = Math.min((data.totalBank / r.pts) * 100, 100).toFixed(0);
@@ -262,7 +269,6 @@
                 `;
             }).join('');
 
-            // 歷史紀錄
             const histList = document.getElementById('historyList');
             histList.innerHTML = data.history.slice(-10).reverse().map(h => `
                 <div class="flex justify-between border-b border-slate-100 py-1">
@@ -273,7 +279,6 @@
         }
 
         function addDailyPoints(pts) { data.todayPoints += pts; saveData(); }
-        
         function undoDailyPoints() { if(data.todayPoints <= 0) return alert("今日無點數可消除"); data.todayPoints = 0; saveData(); }
 
         function settleDay() {
@@ -301,7 +306,6 @@
             const limit = reward.category === 'fun' ? 4000 : 5663;
             const used = reward.category === 'fun' ? data.funBudgetUsed : data.saveBudgetUsed;
             
-            // 檢查本月額度是否足夠
             if (used + reward.pts > limit) {
                 return alert(`❌ 兌換失敗！本月該類別的預算額度不足！\n剩餘額度可用：$${(limit - used).toLocaleString()}`);
             }
@@ -346,7 +350,8 @@
 
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
-        render();
+        // 第一次載入時強制跑一次存檔，把考古回來的舊資料固化進 V7
+        saveData();
     </script>
 </body>
 </html>
