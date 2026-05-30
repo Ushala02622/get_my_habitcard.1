@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夢想存摺 V6</title>
+    <title>夢想存摺 V7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
@@ -57,6 +56,30 @@
             </button>
         </section>
 
+        <section class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 space-y-4">
+            <h2 class="text-lg font-black text-slate-800 flex items-center">💳 本月預算可用餘額 <span id="budgetMonthLabel" class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md ml-2"></span></h2>
+            
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-indigo-600">🛍️ 娛樂/治裝/購物 (上限 $4,000)</span>
+                    <span id="funBudgetText" class="text-slate-500">$4,000 / $4,000</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3">
+                    <div id="funBudgetBar" class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-emerald-600">🚨 緊急預備/彈性儲蓄 (上限 $5,663)</span>
+                    <span id="saveBudgetText" class="text-slate-500">$5,663 / $5,663</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-3">
+                    <div id="saveBudgetBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 100%"></div>
+                </div>
+            </div>
+        </section>
+
         <section>
             <div class="flex justify-between items-center mb-5">
                 <h2 class="text-2xl font-black text-slate-800">📚 習慣養成區</h2>
@@ -99,7 +122,12 @@
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-black mb-4 text-slate-800">新增想買清單</h3>
             <input id="newRewardName" type="text" placeholder="商品名稱" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-3">
-            <input id="newRewardPts" type="number" placeholder="所需點數" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-6">
+            <input id="newRewardPts" type="number" placeholder="所需點數 (1點=$1)" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-3">
+            <label class="block text-xs font-bold text-slate-500 mb-2">選擇預算扣除類別：</label>
+            <select id="newRewardCategory" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-6 font-bold text-slate-700">
+                <option value="fun">🛍️ 娛樂/治裝/購物 ($4,000 限額)</option>
+                <option value="save">🚨 緊急預備/彈性儲蓄 ($5,663 限額)</option>
+            </select>
             <div class="flex space-x-3">
                 <button onclick="toggleModal('rewardModal')" class="flex-1 bg-slate-200 text-slate-600 py-4 rounded-2xl font-bold">取消</button>
                 <button onclick="addItem('reward')" class="flex-1 bg-secondary text-white py-4 rounded-2xl font-bold">添加</button>
@@ -120,14 +148,30 @@
     </div>
 
     <script>
-        // 核心邏輯 (加入資料保留機制)
-      // 核心邏輯 (修正習慣更新機制)
-        let oldData = JSON.parse(localStorage.getItem('habitProDataV5')) || 
-                      JSON.parse(localStorage.getItem('habitProDataV4')) || 
-                      { totalBank: 0, todayPoints: 0, themeColor: '#4f46e5', history: [] };
+        // 核心資料結構修正
+        let currentMonthKey = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
 
-        // 這是預設的新習慣列表
-        const defaultHabits = [
+        let data = JSON.parse(localStorage.getItem('habitProDataV7')) || {
+            totalBank: 0,
+            todayPoints: 0,
+            themeColor: '#4f46e5',
+            habits: [],
+            rewards: [],
+            history: [],
+            currentMonth: currentMonthKey,
+            funBudgetUsed: 0,
+            saveBudgetUsed: 0
+        };
+
+        // 檢查並跨月重置預算
+        if (data.currentMonth !== currentMonthKey) {
+            data.currentMonth = currentMonthKey;
+            data.funBudgetUsed = 0;
+            data.saveBudgetUsed = 0;
+        }
+
+        // 強制灌入最新習慣
+        data.habits = [
             { name: '🚰 喝水 2000CC', pts: 350 },
             { name: '📝 多益模擬 800+', pts: 1200 },
             { name: '📝 多益模擬 750-799', pts: 900 },
@@ -147,13 +191,6 @@
             { name: '📄 投一份履歷', pts: 1200 }
         ];
 
-        // 讀取 V6 紀錄，如果沒有，就用舊紀錄加上新習慣
-        let data = JSON.parse(localStorage.getItem('habitProDataV6'));
-        if (!data) {
-            data = oldData;
-            data.habits = defaultHabits; // 強制更新習慣列表
-            data.rewards = data.rewards || [];
-        }
         document.documentElement.style.setProperty('--primary-color', data.themeColor);
         document.getElementById('primaryColor').value = data.themeColor;
 
@@ -164,41 +201,56 @@
         });
 
         function saveData() {
-            localStorage.setItem('habitProDataV6', JSON.stringify(data));
+            localStorage.setItem('habitProDataV7', JSON.stringify(data));
             render();
         }
 
         function render() {
             document.getElementById('totalBank').innerText = data.totalBank.toLocaleString();
             document.getElementById('todayPoints').innerText = `+${data.todayPoints}`;
+            document.getElementById('budgetMonthLabel').innerText = data.currentMonth;
+
+            // 預算邏輯計算 (1點 = 1元)
+            const funLeft = Math.max(0, 4000 - data.funBudgetUsed);
+            const saveLeft = Math.max(0, 5663 - data.saveBudgetUsed);
+            
+            document.getElementById('funBudgetText').innerText = `$${funLeft.toLocaleString()} / $4,000`;
+            document.getElementById('funBudgetBar').style.width = `${(funLeft / 4000) * 100}%`;
+            
+            document.getElementById('saveBudgetText').innerText = `$${saveLeft.toLocaleString()} / $5,663`;
+            document.getElementById('saveBudgetBar').style.width = `${(saveLeft / 5663) * 100}%`;
 
             // 習慣渲染
             const hList = document.getElementById('habitList');
             hList.innerHTML = data.habits.map((h, i) => `
-                <div class="flex items-center space-x-2 group">
+                <div class="flex items-center space-x-2">
                     <div onclick="addDailyPoints(${h.pts})" class="habit-card flex-1 flex justify-between items-center bg-white p-5 rounded-[1.5rem] shadow-sm border-b-4 border-slate-200 active:border-b-0 transition-all cursor-pointer">
                         <span class="font-bold text-slate-700">${h.name}</span>
                         <span class="font-black text-primary tracking-tighter">+${h.pts}</span>
                     </div>
-                    <button onclick="deleteItem('habit', ${i})" class="text-slate-300 hover:text-red-500 transition-colors p-2 text-xl">✕</button>
                 </div>
             `).join('');
 
-            // 兌換渲染
+            // 商店與兌換渲染 (加入預算類別標籤)
             const rList = document.getElementById('rewardList');
             rList.innerHTML = data.rewards.map((r, i) => {
                 const percent = Math.min((data.totalBank / r.pts) * 100, 100).toFixed(0);
                 const isReady = data.totalBank >= r.pts;
                 const cardStyle = r.exchanged ? 'opacity-40 grayscale' : '';
+                const catName = r.category === 'fun' ? '🛍️ 娛樂' : '🚨 彈性緊急';
+                const catColor = r.category === 'fun' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700';
                 
                 return `
                     <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden ${cardStyle}">
                         <button onclick="deleteItem('reward', ${i})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500">✕</button>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="font-black text-slate-800 text-lg">${r.exchanged ? '✅ ' + r.name + ' (已兌換)' : r.name}</span>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="font-black text-slate-800 text-lg block">${r.exchanged ? '✅ ' + r.name + ' (已兌換)' : r.name}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${catColor}">${catName}</span>
+                            </div>
                             <span class="text-xs font-bold text-slate-400 tracking-tighter uppercase">${data.totalBank} / ${r.pts}</span>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-4 p-1 shadow-inner">
+                        <div class="w-full bg-slate-100 rounded-full h-4 p-1 shadow-inner mt-3">
                             <div class="progress-bar ${isReady ? 'bg-secondary' : 'bg-primary'} h-full rounded-full" style="width: ${percent}%"></div>
                         </div>
                         ${isReady && !r.exchanged ? `
@@ -210,7 +262,7 @@
                 `;
             }).join('');
 
-            // 歷史紀錄渲染
+            // 歷史紀錄
             const histList = document.getElementById('historyList');
             histList.innerHTML = data.history.slice(-10).reverse().map(h => `
                 <div class="flex justify-between border-b border-slate-100 py-1">
@@ -220,28 +272,15 @@
             `).join('');
         }
 
-        // 功能函數
-        function addDailyPoints(pts) {
-            data.todayPoints += pts;
-            saveData();
-        }
+        function addDailyPoints(pts) { data.todayPoints += pts; saveData(); }
         
-        function undoDailyPoints() {
-            if(data.todayPoints <= 0) return alert("今日無點數可消除");
-            if(confirm(`確定要「消除」今日剛剛點擊的點數？`)) {
-                data.todayPoints = 0; 
-                saveData();
-            }
-        }
+        function undoDailyPoints() { if(data.todayPoints <= 0) return alert("今日無點數可消除"); data.todayPoints = 0; saveData(); }
 
         function settleDay() {
-            if(data.todayPoints === 0) return alert("今天還沒開始累積喔！加油！");
+            if(data.todayPoints === 0) return alert("今天還沒開始累積喔！");
             if(confirm(`結算今日努力：+${data.todayPoints} 點？`)) {
                 data.totalBank += data.todayPoints;
-                data.history.push({
-                    date: new Date().toLocaleDateString(),
-                    pts: data.todayPoints
-                });
+                data.history.push({ date: new Date().toLocaleDateString(), pts: data.todayPoints });
                 data.todayPoints = 0;
                 saveData();
             }
@@ -251,22 +290,27 @@
             const date = document.getElementById('histDate').value;
             const pts = document.getElementById('histPts').value;
             if(!date || !pts) return alert("請選擇日期並輸入點數！");
-            
             data.totalBank += parseInt(pts);
-            data.history.push({
-                date: date,
-                pts: parseInt(pts)
-            });
-            document.getElementById('histDate').value = '';
-            document.getElementById('histPts').value = '';
-            toggleModal('historyInputModal');
-            saveData();
+            data.history.push({ date: date, pts: parseInt(pts) });
+            document.getElementById('histDate').value = ''; document.getElementById('histPts').value = '';
+            toggleModal('historyInputModal'); saveData();
         }
 
         function exchange(index) {
             const reward = data.rewards[index];
-            if(confirm(`確定要兌換「${reward.name}」並扣除 ${reward.pts} 點嗎？`)) {
+            const limit = reward.category === 'fun' ? 4000 : 5663;
+            const used = reward.category === 'fun' ? data.funBudgetUsed : data.saveBudgetUsed;
+            
+            // 檢查本月額度是否足夠
+            if (used + reward.pts > limit) {
+                return alert(`❌ 兌換失敗！本月該類別的預算額度不足！\n剩餘額度可用：$${(limit - used).toLocaleString()}`);
+            }
+
+            if(confirm(`確定要兌換「${reward.name}」？\n將扣除星星：${reward.pts} 點，並佔用本月預算額度。`)) {
                 data.totalBank -= reward.pts;
+                if(reward.category === 'fun') data.funBudgetUsed += reward.pts;
+                else data.saveBudgetUsed += reward.pts;
+                
                 reward.exchanged = true;
                 saveData();
                 alert(`恭喜！你成功兌換了 ${reward.name}！🎉`);
@@ -274,16 +318,22 @@
         }
 
         function addItem(type) {
-            const name = document.getElementById(type === 'habit' ? 'newHabitName' : 'newRewardName').value;
-            const pts = document.getElementById(type === 'habit' ? 'newHabitPts' : 'newRewardPts').value;
-            if(!name || !pts) return alert("請輸入完整資訊！");
-            
-            if(type === 'habit') data.habits.push({ name, pts: parseInt(pts) });
-            else data.rewards.push({ name, pts: parseInt(pts), exchanged: false });
-            
-            document.getElementById(type === 'habit' ? 'newHabitName' : 'newRewardName').value = '';
-            document.getElementById(type === 'habit' ? 'newHabitPts' : 'newRewardPts').value = '';
-            toggleModal(type === 'habit' ? 'habitModal' : 'rewardModal');
+            if(type === 'habit') {
+                const name = document.getElementById('newHabitName').value;
+                const pts = document.getElementById('newHabitPts').value;
+                if(!name || !pts) return alert("請輸入完整資訊！");
+                data.habits.push({ name, pts: parseInt(pts) });
+                document.getElementById('newHabitName').value = ''; document.getElementById('newHabitPts').value = '';
+                toggleModal('habitModal');
+            } else {
+                const name = document.getElementById('newRewardName').value;
+                const pts = document.getElementById('newRewardPts').value;
+                const category = document.getElementById('newRewardCategory').value;
+                if(!name || !pts) return alert("請輸入完整資訊！");
+                data.rewards.push({ name, pts: parseInt(pts), category: category, exchanged: false });
+                document.getElementById('newRewardName').value = ''; document.getElementById('newRewardPts').value = '';
+                toggleModal('rewardModal');
+            }
             saveData();
         }
 
@@ -294,10 +344,7 @@
             }
         }
 
-        function toggleModal(id) {
-            const m = document.getElementById(id);
-            m.classList.toggle('hidden');
-        }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
 
         render();
     </script>
