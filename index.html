@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夢想存摺 V8.4.5 (純淨順暢全新版)</title>
+    <title>夢想存摺 V8.4.6 (強制解凍復活版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #09090b; transition: background-color 0.3s; }
-        .progress-bar { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .habit-card:active { transform: scale(0.98); }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #09090b; }
@@ -21,20 +20,20 @@
         <div class="max-w-md mx-auto">
             <div class="flex justify-between items-start">
                 <div>
-                    <p id="monthTitle" class="text-xs text-zinc-400 mb-1 font-medium tracking-widest">📅 載入中...</p>
+                    <p id="monthTitle" class="text-xs text-zinc-400 mb-1 font-medium tracking-widest">📅 5月帳目 ｜ ⭐ 可用娛樂星星</p>
                     <div class="flex items-center">
-                        <span class="text-xl mr-1 theme-text font-bold">⭐</span>
-                        <h1 id="totalBank" class="text-4xl font-black tracking-tighter theme-text">0</h1>
+                        <span class="text-xl mr-1 text-indigo-400 font-bold">⭐</span>
+                        <h1 id="totalBank" class="text-4xl font-black tracking-tighter text-indigo-400">0</h1>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-xs text-zinc-400 mb-1 font-medium tracking-widest">今日賺取</p>
-                    <p id="todayPoints" class="text-2xl font-black theme-accent-text">+0</p>
+                    <p id="todayPoints" class="text-2xl font-black text-emerald-400">+0</p>
                 </div>
             </div>
             
             <div class="flex space-x-2 mt-6">
-                <button onclick="settleDay()" id="btnSettle" class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl text-xs font-black transition-all active:scale-95 shadow-lg">
+                <button onclick="settleDay()" id="btnSettle" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl text-xs font-black transition-all active:scale-95 shadow-lg">
                     🌙 結束今日努力 (結算任務)
                 </button>
                 <button onclick="toggleModal('adjustModal')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-3 rounded-2xl text-xs font-bold transition-all">
@@ -45,11 +44,10 @@
     </div>
 
     <div class="max-w-md mx-auto p-5 space-y-8">
-        
         <section class="bg-gradient-to-b from-zinc-900 to-black text-white p-6 rounded-[2.5rem] shadow-xl space-y-4 relative overflow-hidden border border-zinc-800">
             <div class="absolute right-[-20px] bottom-[-20px] text-zinc-800 text-9xl font-black opacity-10">💰</div>
             <div class="flex justify-between items-center">
-                <h2 class="text-xs font-black tracking-wider text-zinc-400 uppercase">🏦 實體總資產保險庫 (活存+ETF)</h2>
+                <h2 class="text-xs font-black tracking-wider text-zinc-400 uppercase">🏦 實體總資產保險庫</h2>
                 <button onclick="toggleModal('assetModal')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors">
                     📝 更新總資產
                 </button>
@@ -58,9 +56,9 @@
                 <p class="text-[11px] text-zinc-500">當前登記總資產</p>
                 <h3 id="assetDisplay" class="text-3xl font-black tracking-tight text-yellow-500">$368,485</h3>
             </div>
-            <div id="assetChangeBox" class="bg-zinc-800/50 p-3 rounded-xl text-xs flex justify-between items-center font-medium border border-zinc-800">
+            <div class="bg-zinc-800/50 p-3 rounded-xl text-xs flex justify-between items-center font-medium border border-zinc-800">
                 <span class="text-zinc-400">📊 較上月資產變動：</span>
-                <span id="assetChangeText" class="font-bold text-zinc-300">首月建立，尚無變動</span>
+                <span id="assetChangeText" class="font-bold text-zinc-400">持平穩定中</span>
             </div>
         </section>
 
@@ -71,20 +69,18 @@
                     💸 記日常開銷
                 </button>
             </div>
-            
             <div class="space-y-1.5">
                 <div class="flex justify-between text-xs font-bold">
-                    <span class="theme-text">🛍️ 娛樂購物上限 (目標 $4,000)</span>
+                    <span class="text-indigo-400">🛍️ 娛樂購物上限 (目標 $4,000)</span>
                     <span id="funBudgetText" class="text-zinc-400">$4,000 / $4,000</span>
                 </div>
                 <div class="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
                     <div id="funBudgetBar" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 100%"></div>
                 </div>
             </div>
-
             <div class="space-y-1.5">
                 <div class="flex justify-between text-xs font-bold">
-                    <span class="theme-accent-text">🏥 醫療/臨時社交彈性金 (上限 $5,663)</span>
+                    <span class="text-emerald-400">🏥 醫療/臨時社交彈性金 (上限 $5,663)</span>
                     <span id="saveBudgetText" class="text-zinc-400">$5,663 / $5,663</span>
                 </div>
                 <div class="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
@@ -112,47 +108,94 @@
             </div>
             <div id="rewardList" class="space-y-3"></div>
         </section>
-        
-        <section class="bg-zinc-900 p-6 rounded-[2rem] shadow-sm border border-zinc-800">
-            <h2 class="text-base font-black text-zinc-300 mb-3 tracking-wide">📊 歷史理財日誌</h2>
-            <div id="historyList" class="space-y-2 text-xs text-zinc-400 font-mono"></div>
-        </section>
     </div>
 
-    <div class="fixed bottom-4 left-4 right-4 z-30 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 p-3 rounded-2xl max-w-md mx-auto shadow-2xl">
-        <p class="text-center text-[10px] text-zinc-500 font-bold tracking-widest mb-2 uppercase">🎨 點擊切換個性主題色彩</p>
-        <div class="flex justify-around items-center">
-            <button onclick="changeTheme('default')" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-emerald-500 border-2 border-zinc-700 active:scale-90 transition-transform" title="極致黑灰"></button>
-            <button onclick="changeTheme('slateBlue')" class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-blue-500 border-2 border-zinc-700 active:scale-90 transition-transform" title="冰川灰藍"></button>
-            <button onclick="changeTheme('forest')" class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 border-2 border-zinc-700 active:scale-90 transition-transform" title="特工墨綠"></button>
-            <button onclick="changeTheme('cyber')" class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-zinc-700 active:scale-90 transition-transform" title="霓虹紫"></button>
-            <button onclick="changeTheme('racing')" class="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-zinc-700 border-2 border-zinc-700 active:scale-90 transition-transform" title="極速紅"></button>
-        </div>
-    </div>
+    <div id="assetModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6"><div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm"><h3 class="text-lg font-black mb-2">🏦 更新實體總資產</h3><input id="newAssetValue" type="number" class="w-full bg-zinc-800 p-4 rounded-2xl mb-6 text-zinc-100 outline-none"><div class="flex space-x-3"><button onclick="toggleModal('assetModal')" class="flex-1 bg-zinc-800 py-4 rounded-2xl font-bold">取消</button><button onclick="updateTotalAsset()" class="flex-1 bg-indigo-600 py-4 rounded-2xl font-bold">確認</button></div></div></div>
+    <div id="adjustModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6"><div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm"><h3 class="text-lg font-black mb-2">🔧 手動微調星星</h3><input id="adjAmount" type="number" class="w-full bg-zinc-800 p-4 rounded-2xl mb-4 text-zinc-100 outline-none"><div class="flex space-x-3"><button onclick="toggleModal('adjustModal')" class="flex-1 bg-zinc-800 py-4 rounded-2xl font-bold">取消</button><button onclick="executeAdjustment()" class="flex-1 bg-indigo-600 py-4 rounded-2xl font-bold">確定</button></div></div></div>
+    <div id="expenseModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6"><div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm"><h3 class="text-lg font-black mb-2">💸 記一筆日常開銷</h3><input id="expName" type="text" placeholder="項目" class="w-full bg-zinc-800 p-4 rounded-2xl mb-3 text-zinc-100 outline-none"><input id="expAmount" type="number" placeholder="金額" class="w-full bg-zinc-800 p-4 rounded-2xl mb-6 text-zinc-100 outline-none"><div class="flex space-x-3"><button onclick="toggleModal('expenseModal')" class="flex-1 bg-zinc-800 py-4 rounded-2xl font-bold">取消</button><button onclick="addExpense()" class="flex-1 bg-emerald-600 py-4 rounded-2xl font-bold">記帳</button></div></div></div>
+    <div id="habitModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6"><div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm"><h3 class="text-lg font-black mb-4">新增充實任務</h3><input id="newHabitName" type="text" placeholder="任務名稱" class="w-full bg-zinc-800 p-4 rounded-2xl mb-3 text-zinc-100 outline-none"><input id="newHabitPts" type="number" placeholder="獎勵點數" class="w-full bg-zinc-800 p-4 rounded-2xl mb-6 text-zinc-100 outline-none"><div class="flex space-x-3"><button onclick="toggleModal('habitModal')" class="flex-1 bg-zinc-800 py-4 rounded-2xl font-bold">取消</button><button onclick="addHabitItem()" class="flex-1 bg-indigo-600 py-4 rounded-2xl font-bold">添加</button></div></div></div>
+    <div id="rewardModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6"><div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm"><h3 class="text-lg font-black mb-4">🛍️ 上架新的夢想願望</h3><input id="newRewardName" type="text" placeholder="商品名稱" class="w-full bg-zinc-800 p-4 rounded-2xl mb-3 text-zinc-100 outline-none"><input id="newRewardPts" type="number" placeholder="需要星星" class="w-full bg-zinc-800 p-4 rounded-2xl mb-6 text-zinc-100 outline-none"><div class="flex space-x-3"><button onclick="toggleModal('rewardModal')" class="flex-1 bg-zinc-800 py-4 rounded-2xl font-bold">取消</button><button onclick="addRewardItem()" class="flex-1 bg-indigo-600 py-4 rounded-2xl font-bold">上架</button></div></div></div>
 
-    <div id="assetModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm shadow-2xl text-zinc-100">
-            <h3 class="text-lg font-black mb-2">🏦 更新實體總資產</h3>
-            <input id="newAssetValue" type="number" placeholder="目前當前真實總資產" class="w-full bg-zinc-800 border-none p-4 rounded-2xl mb-6 text-zinc-100 outline-none">
-            <div class="flex space-x-3">
-                <button onclick="toggleModal('assetModal')" class="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-bold">取消</button>
-                <button onclick="updateTotalAsset()" id="btnAssetConfirm" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold">確認登記</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        // ⚡【絕對保險】：開機第一步，直接把以前所有亂掉的版本緩存全部抹除！
+        const badKeys = ['habitProDataV8_1', 'habitProDataV8_2', 'habitProDataV8_3', 'habitProDataV8_4', 'habitProDataV8_4_1', 'dreamBankData_Clean_v5'];
+        badKeys.forEach(k => localStorage.removeItem(k));
 
-    <div id="adjustModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm shadow-2xl text-zinc-100">
-            <h3 class="text-lg font-black mb-2">🔧 手動微調星星</h3>
-            <input id="adjAmount" type="number" placeholder="增減數量" class="w-full bg-zinc-800 border-none p-4 rounded-2xl mb-4 text-zinc-100 outline-none">
-            <div class="flex space-x-3">
-                <button onclick="toggleModal('adjustModal')" class="flex-1 bg-zinc-800 text-zinc-400 py-4 rounded-2xl font-bold">取消</button>
-                <button onclick="executeAdjustment()" id="btnAdjConfirm" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold">確定</button>
-            </div>
-        </div>
-    </div>
+        let data = {
+            totalBank: 0, todayPoints: 0, funBudgetUsed: 0, saveBudgetUsed: 0,
+            lastMonthAsset: 368485, currentAsset: 368485,
+            habits: [
+                { name: '💧 喝水 2000 CC', pts: 10 }, { name: '🧘 瑜珈 30 mins', pts: 20 },
+                { name: '🌙 12 點前睡覺', pts: 30 }, { name: '🏃‍♂️ 慢跑 5 KM', pts: 50 },
+                { name: '🗣️ 英文口說 30 mins', pts: 25 }, { name: '📖 多益錯題解析', pts: 25 },
+                { name: '📝 寫一份多益模擬試題', pts: 60 }
+            ],
+            rewards: [
+                { name: '🌴 峇里島特赦購物金', pts: 1, exchanged: false },
+                { name: '👑 下一趟旅行大基金', pts: 3000, exchanged: false }
+            ]
+        };
 
-    <div id="expenseModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center p-6">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-[2rem] p-8 w-full max-w-sm shadow-2xl text-zinc-100">
-            <h3 class="text-lg font-black mb-2">💸 記一筆日常開銷</h3>
-            <input id="expName" type="text" placeholder="項目 (例：🏥
+        // 讀取全新安全區資料
+        try {
+            let fresh = localStorage.getItem('dreamBank_Absolute_Safe_V86');
+            if (fresh) data = JSON.parse(fresh);
+        } catch(e){}
+
+        function saveData() {
+            try { localStorage.setItem('dreamBank_Absolute_Safe_V86', JSON.stringify(data)); } catch(e){}
+            render();
+        }
+
+        function render() {
+            try {
+                document.getElementById('totalBank').innerText = Number(data.totalBank).toLocaleString();
+                document.getElementById('todayPoints').innerText = `+${data.todayPoints}`;
+                document.getElementById('assetDisplay').innerText = `$${Number(data.currentAsset).toLocaleString()}`;
+
+                const funLeft = Math.max(0, 4000 - data.funBudgetUsed);
+                document.getElementById('funBudgetText').innerText = `$${funLeft.toLocaleString()} / $4,000`;
+                document.getElementById('funBudgetBar').style.width = `${(funLeft / 4000) * 100}%`;
+
+                const saveLeft = Math.max(0, 5663 - data.saveBudgetUsed);
+                document.getElementById('saveBudgetText').innerText = `$${saveLeft.toLocaleString()} / $5,663`;
+                document.getElementById('saveBudgetBar').style.width = `${(saveLeft / 5663) * 100}%`;
+
+                document.getElementById('habitList').innerHTML = data.habits.map((h, i) => `
+                    <div class="flex items-center space-x-2">
+                        <div onclick="addDailyPoints(${h.pts})" class="habit-card flex-1 flex justify-between items-center bg-zinc-900 p-5 rounded-[1.5rem] border border-zinc-800 border-b-4 border-b-zinc-700 active:border-b transition-all cursor-pointer">
+                            <span class="font-bold text-zinc-200">${h.name}</span>
+                            <span class="font-black text-indigo-400">+${h.pts} ⭐</span>
+                        </div>
+                        <button onclick="deleteHabitItem(${i})" class="bg-zinc-900 border border-zinc-800 hover:text-red-400 p-5 rounded-2xl text-sm transition-colors">✕</button>
+                    </div>
+                `).join('');
+
+                document.getElementById('rewardList').innerHTML = data.rewards.map((r, i) => `
+                    <div class="bg-zinc-900 p-5 rounded-[2rem] border border-zinc-800 flex justify-between items-center space-x-2">
+                        <div class="flex-1">
+                            <span class="font-black text-zinc-200 block text-sm">${r.name}</span>
+                            <span class="text-xs text-zinc-500 font-bold">花費: ${r.pts} 星星</span>
+                        </div>
+                        <button onclick="deleteRewardItem(${i})" class="bg-zinc-800 text-zinc-500 hover:text-red-400 px-3 py-2 rounded-xl text-xs font-bold transition-colors">✕</button>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        function addDailyPoints(pts) { data.todayPoints += pts; saveData(); }
+        function settleDay() { if(data.todayPoints === 0) return alert("今天還沒累積任務喔！"); data.totalBank += data.todayPoints; data.todayPoints = 0; saveData(); }
+        function executeAdjustment() { const amount = parseInt(document.getElementById('adjAmount').value); if(!isNaN(amount)) data.totalBank += amount; toggleModal('adjustModal'); document.getElementById('adjAmount').value = ''; saveData(); }
+        function addExpense() { const amount = parseInt(document.getElementById('expAmount').value); if(!isNaN(amount)) data.saveBudgetUsed += amount; toggleModal('expenseModal'); document.getElementById('expName').value = ''; document.getElementById('expAmount').value = ''; saveData(); }
+        function addHabitItem() { const name = document.getElementById('newHabitName').value; const pts = parseInt(document.getElementById('newHabitPts').value); if(name && !isNaN(pts)) data.habits.push({ name, pts }); toggleModal('habitModal'); document.getElementById('newHabitName').value = ''; document.getElementById('newHabitPts').value = ''; saveData(); }
+        function addRewardItem() { const name = document.getElementById('newRewardName').value; const pts = parseInt(document.getElementById('newRewardPts').value); if(name && !isNaN(pts)) data.rewards.push({ name, pts }); toggleModal('rewardModal'); document.getElementById('newRewardName').value = ''; document.getElementById('newRewardPts').value = ''; saveData(); }
+        function deleteHabitItem(index) { data.habits.splice(index, 1); saveData(); }
+        function deleteRewardItem(index) { data.rewards.splice(index, 1); saveData(); }
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function updateTotalAsset() { const val = parseInt(document.getElementById('newAssetValue').value); if(!isNaN(val)) data.currentAsset = val; toggleModal('assetModal'); document.getElementById('newAssetValue').value = ''; saveData(); }
+
+        // 啟動
+        render();
+    </script>
+</body>
+</html>
