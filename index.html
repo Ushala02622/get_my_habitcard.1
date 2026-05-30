@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夢想存摺 V8.4.2 (終極復活版)</title>
+    <title>夢想存摺 V8.4.3 (時光機滿血復活版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;700;900&display=swap');
@@ -55,3 +55,31 @@
                 </button>
             </div>
             <div>
+                <p class="text-[11px] text-zinc-500">當前登記總資產</p>
+                <h3 id="assetDisplay" class="text-3xl font-black tracking-tight text-yellow-500">$368,485</h3>
+            </div>
+            <div id="assetChangeBox" class="bg-zinc-800/50 p-3 rounded-xl text-xs flex justify-between items-center font-medium border border-zinc-800">
+                <span class="text-zinc-400">📊 較上月資產變動：</span>
+                <span id="assetChangeText" class="font-bold text-zinc-300">首月建立，尚無變動</span>
+            </div>
+        </section>
+
+        <section class="bg-zinc-900 p-6 rounded-[2rem] shadow-sm border border-zinc-800 space-y-5">
+            <div class="flex justify-between items-center">
+                <h2 class="text-base font-black text-zinc-200 tracking-wide">💳 每月預算控制看板</h2>
+                <button onclick="toggleModal('expenseModal')" class="bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-zinc-700 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors">
+                    💸 記日常開銷
+                </button>
+            </div>
+            
+            <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="theme-text">🛍️ 娛樂購物上限 (目標 $4,000)</span>
+                    <span id="funBudgetText" class="text-zinc-400">$4,000 / $4,000</span>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
+                    <div id="funBudgetBar" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
