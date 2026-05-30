@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>夢想存摺 V7.5 (還債止損版)</title>
+    <title>夢想存摺 V7.6 (實戰平帳版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght=400;700;900&display=swap');
@@ -11,15 +11,11 @@
         .progress-bar { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .habit-card:active { transform: scale(0.98); }
         :root { --primary-color: #ef4444; --secondary-color: #059669; }
-        .bg-primary { background-color: var(--primary-color); }
-        .text-primary { color: var(--primary-color); }
-        .bg-secondary { background-color: var(--secondary-color); }
-        .text-secondary { color: var(--secondary-color); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen pb-24">
 
-    <!-- 頂部面板：若是負債會呈現紅色警告 -->
+    <!-- 頂部面板：動態變色 -->
     <div id="topPanel" class="sticky top-0 text-white p-6 shadow-2xl z-20 rounded-b-[2.5rem] bg-red-600">
         <div class="max-w-md mx-auto">
             <div class="flex justify-between items-start">
@@ -35,9 +31,14 @@
                     <p id="todayPoints" class="text-2xl font-black text-yellow-300">+0</p>
                 </div>
             </div>
+            
+            <!-- 這次真的有按鈕區了！ -->
             <div class="flex space-x-2 mt-6">
-                <button onclick="settleDay()" class="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/40 py-3 rounded-2xl text-sm font-black transition-all active:scale-95">
-                    🌙 結束今日還債任務
+                <button onclick="settleDay()" class="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/40 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95">
+                    🌙 結束今日任務
+                </button>
+                <button onclick="toggleModal('adjustModal')" class="bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-4 py-2.5 rounded-xl text-xs font-black shadow-md transition-all active:scale-95">
+                    🔧 手動調整星星 (平帳/增債)
                 </button>
             </div>
         </div>
@@ -54,10 +55,9 @@
                 </button>
             </div>
             
-            <!-- 娛樂預算條：會自動扣除超支 -->
             <div>
                 <div class="flex justify-between text-xs font-bold mb-1">
-                    <span class="text-red-600">🛍️ 娛樂購物額度 (上月超支已自動連坐扣除)</span>
+                    <span class="text-red-600">🛍️ 娛樂購物額度 (上月超支已自動連坐)</span>
                     <span id="funBudgetText" class="text-slate-500">$4,000 / $4,000</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-3">
@@ -65,7 +65,6 @@
                 </div>
             </div>
 
-            <!-- 彈性預算條 -->
             <div>
                 <div class="flex justify-between text-xs font-bold mb-1">
                     <span class="text-emerald-600">🏥 醫療/必要社交 (上限 $5,663)</span>
@@ -77,7 +76,7 @@
             </div>
 
             <button onclick="settleMonth()" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-xs font-black tracking-wide hover:bg-slate-800 transition-colors">
-                🏁 月底結算 (剩餘彈性預算將強制拿去還債！)
+                🏁 月底結算 (剩餘彈性預算強制填補債務)
             </button>
         </section>
 
@@ -92,10 +91,10 @@
             <div id="habitList" class="grid grid-cols-1 gap-3"></div>
         </section>
 
-        <!-- 🌌 債務清單 -->
+        <!-- 🌌 願望與債務商店 -->
         <section>
             <div class="flex justify-between items-center mb-5">
-                <h2 class="text-2xl font-black text-slate-800">🚨 已預支債務分期中</h2>
+                <h2 class="text-2xl font-black text-slate-800">🚨 債務與特赦商店</h2>
             </div>
             <div id="rewardList" class="space-y-4"></div>
         </section>
@@ -107,7 +106,21 @@
         </section>
     </div>
 
-    <!-- Modals -->
+    <!-- 🔧 真正的手動調整視窗 -->
+    <div id="adjustModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 flex items-center justify-center p-6">
+        <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl">
+            <h3 class="text-xl font-black mb-2 text-slate-800">🔧 手動調整星星數量</h3>
+            <p class="text-xs text-slate-500 mb-4">輸入正數增加星星（如 ETF平帳 +12199），輸入負數扣除星星（如 增債 -7869）。</p>
+            <input id="adjAmount" type="number" placeholder="例如: 12199 或 -7869" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-3">
+            <input id="adjNote" type="text" placeholder="調整原因 (例: ETF獲利平帳)" class="w-full bg-slate-100 border-none p-4 rounded-2xl mb-6">
+            <div class="flex space-x-3">
+                <button onclick="toggleModal('adjustModal')" class="flex-1 bg-slate-200 text-slate-600 py-4 rounded-2xl font-bold">取消</button>
+                <button onclick="executeAdjustment()" class="flex-1 bg-yellow-500 text-slate-950 py-4 rounded-2xl font-bold">確認調整</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 其他開銷/習慣視窗 -->
     <div id="expenseModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 flex items-center justify-center p-6">
         <div class="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-black mb-2 text-slate-800">💸 記一筆必要/臨時開銷</h3>
@@ -134,21 +147,17 @@
 
     <script>
         let currentMonthKey = new Date().getFullYear() + '-' + (new Date().getMonth() + 1);
-
-        // 如果是全新載入或要強制鎖死債務，初始化設定
         let localData = JSON.parse(localStorage.getItem('habitProDataV7'));
         
-        // 🚨 核心鎖定：如果初次使用此版本，直接把四件套上架並扣成負分
-        if (!localData || !localData.hasDebtLocked) {
+        if (!localData) {
             localData = {
-                totalBank: -4330, // 450 + 1200 + 1280 + 1400 = 4330 負債開局！
+                totalBank: -4330,
                 todayPoints: 0,
                 themeColor: '#ef4444',
                 currentMonth: currentMonthKey,
-                funBudgetUsed: 4330, // 娛樂額度本月直接打爆超支 $330
+                funBudgetUsed: 4330,
                 saveBudgetUsed: 0,
-                hasDebtLocked: true, // 鎖定標記，防重複扣除
-                history: [{ date: '🚨 系統債務鎖定', pts: '-4330 ⭐ (透支香水、水壺、耳環、衣服)' }],
+                history: [{ date: '🚨 系統初始化', pts: '-4330 ⭐' }],
                 habits: [
                     { name: '💧 喝水 2000 CC', pts: 10 },
                     { name: '🧘 瑜珈 30 mins', pts: 20 },
@@ -165,22 +174,25 @@
                     { name: '🥛 Owala 質感水壺', pts: 1200, exchanged: true },
                     { name: '👂 🤝 質感耳環', pts: 1280, exchanged: true },
                     { name: '👗 漂亮衣服', pts: 1400, exchanged: true },
-                    { name: '👑 EXO 演唱會門票 (未解鎖)', pts: 4190, exchanged: false }
+                    { name: '🌴 峇里島特赦購物金 (上限$5000現金)', pts: 5000, exchanged: false },
+                    { name: '👑 EXO 演唱會門票', pts: 4190, exchanged: false }
                 ]
             };
         }
 
         let data = localData;
 
-        // 跨月追償連坐邏輯
+        // 保證峇里島有出現在獎勵清單中
+        if (!data.rewards.some(r => r.name.includes('峇里島'))) {
+            data.rewards.splice(4, 0, { name: '🌴 峇里島特赦購物金 (上限$5000現金)', pts: 5000, exchanged: false });
+        }
+
         if (data.currentMonth !== currentMonthKey) {
-            // 計算上個月娛樂超支了多少錢 (超過 4000 的部分)
             let debtOver = Math.max(0, data.funBudgetUsed - 4000); 
             data.currentMonth = currentMonthKey;
             data.saveBudgetUsed = 0;
-            // 下個月的初始使用量 = 上月超支。也就是說下月一開始可用額度就變少了！
             data.funBudgetUsed = debtOver; 
-            data.history.push({ date: `🚨 跨月超支追償 (${currentMonthKey})`, pts: `下月娛樂額度扣除 $${debtOver}` });
+            data.history.push({ date: `🚨 跨月超支連坐 (${currentMonthKey})`, pts: `額度扣除 $${debtOver}` });
         }
 
         function saveData() {
@@ -193,14 +205,12 @@
             document.getElementById('todayPoints').innerText = `+${data.todayPoints}`;
             document.getElementById('budgetMonthLabel').innerText = data.currentMonth;
 
-            // 娛樂預算：上限 $4,000，超支會顯示負數或歸零
             const funLeft = 4000 - data.funBudgetUsed;
             document.getElementById('funBudgetText').innerText = `$${funLeft.toLocaleString()} / $4,000`;
             document.getElementById('funBudgetBar').style.width = `${Math.max(0, Math.min(100, (funLeft / 4000) * 100))}%`;
             
-            // 變色警告
             if (data.totalBank < 0) {
-                document.getElementById('topPanel').className = "sticky top-0 text-white p-6 shadow-2xl z-20 rounded-b-[2.5rem] bg-red-600 animate-pulse";
+                document.getElementById('topPanel').className = "sticky top-0 text-white p-6 shadow-2xl z-20 rounded-b-[2.5rem] bg-red-600";
                 document.getElementById('bankLabel').innerText = "🚨 債務泥潭！尚需償還星星";
             } else {
                 document.getElementById('topPanel').className = "sticky top-0 text-white p-6 shadow-2xl z-20 rounded-b-[2.5rem] bg-emerald-600";
@@ -211,7 +221,6 @@
             document.getElementById('saveBudgetText').innerText = `$${saveLeft.toLocaleString()} / $5,663`;
             document.getElementById('saveBudgetBar').style.width = `${(saveLeft / 5663) * 100}%`;
 
-            // 任務清單
             const hList = document.getElementById('habitList');
             hList.innerHTML = data.habits.map((h, i) => `
                 <div class="flex items-center space-x-2">
@@ -223,7 +232,6 @@
                 </div>
             `).join('');
 
-            // 商店與債務
             const rList = document.getElementById('rewardList');
             rList.innerHTML = data.rewards.map((r, i) => {
                 if (r.exchanged) {
@@ -233,7 +241,7 @@
                                 <span class="font-black text-red-800 text-base block">💸 已提前透支：${r.name}</span>
                                 <span class="text-xs text-red-500 font-bold">代價：-${r.pts} 星星 </span>
                             </div>
-                            <span class="bg-red-200 text-red-800 text-xs px-3 py-1 rounded-xl font-black">扣還中</span>
+                            <span class="bg-red-200 text-red-800 text-xs px-3 py-1 rounded-xl font-black">已記帳</span>
                         </div>
                     `;
                 } else {
@@ -246,25 +254,43 @@
                             </div>
                             ${isReady ? `
                                 <button onclick="exchange(${i})" class="w-full mt-4 bg-emerald-600 text-white py-3 rounded-2xl font-black">🎁 兌換</button>
-                            ` : `<button class="w-full mt-4 bg-slate-100 text-slate-400 py-3 rounded-2xl text-xs font-bold cursor-not-allowed" disabled>❌ 星星為負數或不足，無法解鎖</button>`}
+                            ` : `<button class="w-full mt-4 bg-slate-100 text-slate-400 py-3 rounded-2xl text-xs font-bold cursor-not-allowed" disabled>❌ 星星為負數或不足，解鎖失敗</button>`}
                         </div>
                     `;
                 }
             }).join('');
 
             const histList = document.getElementById('historyList');
-            histList.innerHTML = data.history.slice(-10).reverse().map(h => `
+            histList.innerHTML = data.history.slice(-12).reverse().map(h => `
                 <div class="flex justify-between border-b border-slate-100 py-1">
                     <span>${h.date}</span>
-                    <span class="font-bold ${h.pts.toString().includes('-') ? 'text-red-500' : 'text-slate-800'}">${h.pts}</span>
+                    <span class="font-bold ${h.pts.toString().includes('-') ? 'text-red-500' : 'text-emerald-600'}">${h.pts}</span>
                 </div>
             `).join('');
+        }
+
+        // 🔧 執行手動調整邏輯
+        function executeAdjustment() {
+            const amount = parseInt(document.getElementById('adjAmount').value);
+            const note = document.getElementById('adjNote').value || '手動調整';
+            if(isNaN(amount)) return alert("請輸入有效的數字！");
+            
+            data.totalBank += amount;
+            data.history.push({ 
+                date: `🔧 ${note}`, 
+                pts: `${amount >= 0 ? '+' : ''}${amount} ⭐` 
+            });
+            
+            document.getElementById('adjAmount').value = '';
+            document.getElementById('adjNote').value = '';
+            toggleModal('adjustModal');
+            saveData();
         }
 
         function addDailyPoints(pts) { data.todayPoints += pts; saveData(); }
 
         function settleDay() {
-            if(data.todayPoints === 0) return alert("今天還沒賺取任何還債點數喔！");
+            if(data.todayPoints === 0) return alert("今天還沒還債喔！");
             data.totalBank += data.todayPoints;
             data.history.push({ date: '🛠️ 還債：' + new Date().toLocaleDateString(), pts: `+${data.todayPoints} ⭐` });
             data.todayPoints = 0;
@@ -281,17 +307,14 @@
             toggleModal('expenseModal'); saveData();
         }
 
-        // 月底結算：如果這時候彈性儲蓄有剩，強制全部拿去填補星星債務！
         function settleMonth() {
             const saveLeft = 5663 - data.saveBudgetUsed;
-            if(saveLeft <= 0) return alert("本月沒有剩餘彈性預算可以還債。");
-            
-            if(confirm(`🏁 確定結算本月？\n剩餘的 $${saveLeft} 彈性預算將強制注入，幫你抵銷債務！`)) {
+            if(saveLeft <= 0) return alert("沒有剩餘彈性預算。");
+            if(confirm(`🏁 確定結算？\n剩餘的 $${saveLeft} 彈性預算將強制注入還債！`)) {
                 data.totalBank += saveLeft;
-                data.history.push({ date: `🏁 月底預算強制還債 (${data.currentMonth})`, pts: `+${saveLeft} ⭐` });
+                data.history.push({ date: `🏁 月底結算強制還債`, pts: `+${saveLeft} ⭐` });
                 data.saveBudgetUsed = 5663; 
                 saveData();
-                alert(`成功用省下來的預算償還了 ${saveLeft} 點債務！`);
             }
         }
 
